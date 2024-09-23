@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "42078667458",
+    "project_id": "dogfood-a31a4",
+    "storage_bucket": "dogfood-a31a4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42078667458:android:193e0a41dc0017e8ecb15b",
+        "android_client_info": {
+          "package_name": "com.example.dogfood"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApRjZCJsTnC0GnsVpmns-yf0kggWPS1f4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
