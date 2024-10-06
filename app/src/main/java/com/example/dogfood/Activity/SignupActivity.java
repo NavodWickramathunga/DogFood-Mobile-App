@@ -1,29 +1,28 @@
 package com.example.dogfood.Activity;
 
-import android.media.MediaPlayer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.example.dogfood.R;
 import com.example.dogfood.databinding.ActivitySignupBinding;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.FirebaseNetworkException;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 public class SignupActivity extends BaseActivity {
     ActivitySignupBinding binding;
     private FirebaseAuth mAuth;
-    private String TAG = "SignupActivity";
-
+    private static final String TAG = "SignupActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,27 +32,64 @@ public class SignupActivity extends BaseActivity {
 
         mAuth = FirebaseAuth.getInstance();
         setVariable();
-        }
+    }
 
-        private void setVariable() {
-          binding.signupBtn.setOnClickListener((View.OnClickListener) v -> {
-              String email = binding.userEdt.getText().toString();
-              String password = binding.passEdt.getText().toString();
+    private void setVariable() {
+        binding.signupBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = binding.userEdt.getText().toString().trim();
+                String password = binding.passEdt.getText().toString().trim();
 
-              if (password.length() < 6) {
-                  Toast.makeText(SignupActivity.this, "Your password must be 6 characters", Toast.LENGTH_SHORT).show();
-                  return;
-              }
-              mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(SignupActivity.this, task -> {
-                  if (task.isComplete()) {
-                      Log.i(TAG, "onComplete: Account created successfully");
-                      startActivity(new Intent(SignupActivity.this, MainActivity.class));
-                  } else {
-                      Log.i(TAG, "failure: " + task.getException());
-                      Toast.makeText(SignupActivity.this, "Authenticaltion failed", Toast.LENGTH_SHORT).show();
+                if (email.isEmpty() || password.isEmpty()) {
+                    Toast.makeText(SignupActivity.this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                  }
-              });
-          });
+                if (password.length() < 6) {
+                    Toast.makeText(SignupActivity.this, "Your password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Disable the signup button to prevent multiple clicks
+                binding.signupBtn.setEnabled(false);
+
+                mAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                // Re-enable the signup button
+                                binding.signupBtn.setEnabled(true);
+
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "createUserWithEmail:success");
+                                    FirebaseUser user = mAuth.getCurrentUser();
+                                    Toast.makeText(SignupActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(SignupActivity.this, MainActivity.class));
+                                    finish();
+                                } else {
+                                    Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                                    String errorMessage = "Authentication failed";
+
+                                    try {
+                                        throw task.getException();
+                                    } catch (FirebaseAuthWeakPasswordException e) {
+                                        errorMessage = "Password is too weak";
+                                    } catch (FirebaseAuthInvalidCredentialsException e) {
+                                        errorMessage = "Invalid email format";
+                                    } catch (FirebaseAuthUserCollisionException e) {
+                                        errorMessage = "Email already in use";
+                                    } catch (FirebaseNetworkException e) {
+                                        errorMessage = "Network error. Please check your internet connection";
+                                    } catch (Exception e) {
+                                        errorMessage = "Authentication failed: " + e.getMessage();
+                                    }
+
+                                    Toast.makeText(SignupActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
+            }
+        });
     }
 }

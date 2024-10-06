@@ -6,4 +6,17 @@
     </style>
 
     <style name="Theme.DogFood" parent="Base.Theme.DogFood" />
+
+    <style name="textStyle" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/blue_grey</item>
+
+    </style>
+    <style name="textStyleBold" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/blue_grey</item>
+        <item name="android:textstyle">bold</item>
+
+
+    </style>
 </resources>
